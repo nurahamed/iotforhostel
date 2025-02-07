@@ -1,0 +1,72 @@
+#define BLYNK_TEMPLATE_ID "TMPL3nEVIKJiU"
+#define BLYNK_TEMPLATE_NAME "Relay control"
+#define BLYNK_AUTH_TOKEN "KtPMy14QN63TcvmPmduFT447V2BnYWXJ"
+//code done but blink led stop and wifi connention reconnect program.
+#define BLYNK_PRINT Serial
+
+#include <ESP8266WiFi.h>
+#include <BlynkSimpleEsp8266.h>
+
+char ssid[] = "wifi";  // WiFi SSID
+char pass[] = "12345690";  // WiFi Password
+
+int blynk_led_switch = 0;   // Variable to store V0 switch state
+int blynk_led_switch1 = 0;  // Variable to store V1 switch state
+
+BlynkTimer timer;  // Timer object
+
+void setup()
+{
+  Serial.begin(74880);  // Debug console
+
+  pinMode(0, OUTPUT);  // Onboard LED of Wemos D1 mini (GPIO2)
+  pinMode(4, OUTPUT);  // External LED (GPIO4)
+
+  digitalWrite(0, LOW);  // Ensure LEDs start OFF
+  digitalWrite(4, LOW);
+
+  Blynk.begin(BLYNK_AUTH_TOKEN, ssid, pass);
+
+  timer.setInterval(500L, toggle_led);  // Timer to toggle LEDs every 500ms
+}
+
+void loop()
+{
+  Blynk.run();
+  timer.run();  // Run the timer
+}
+
+void toggle_led()
+{
+  if (blynk_led_switch == 1)
+  {
+    int current_state = digitalRead(0);
+    digitalWrite(0, !current_state);  // Toggle LED on GPIO2
+  }
+
+  if (blynk_led_switch1 == 1)
+  {
+    int current_state = digitalRead(4);
+    digitalWrite(4, !current_state);  // Toggle LED on GPIO4
+  }
+}
+
+BLYNK_CONNECTED()
+{
+  Blynk.syncVirtual(V0);  // Sync switch states
+  Blynk.syncVirtual(V1);
+}
+
+BLYNK_WRITE(V0)  // Triggered when V0 switch changes
+{
+  blynk_led_switch = param.asInt();
+  if (blynk_led_switch == 0)
+    digitalWrite(0, LOW);  // Turn off LED if switch is OFF
+}
+
+BLYNK_WRITE(V1)  // Triggered when V1 switch changes
+{
+  blynk_led_switch1 = param.asInt();
+  if (blynk_led_switch1 == 0)
+    digitalWrite(4, LOW);  // Turn off LED if switch is OFF
+}
