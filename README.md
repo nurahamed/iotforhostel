@@ -52,3 +52,6 @@
 - If the upload fails, check **baud rate** and **drivers**.
 - Use a stable internet connection for Blynk connectivity.
 
+## Relay
+- https://components101.com/switches/5v-relay-pinout-working-datasheet
+
